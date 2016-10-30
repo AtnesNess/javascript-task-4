@@ -155,19 +155,14 @@ if (exports.isStar) {
         var functions = [].slice.call(arguments);
 
         return function or(collection) {
-            var filteredCollection = [];
-            functions.forEach(function (func) {
-
-                func(collection.slice()).forEach(function (contact) {
-                    if (filteredCollection.indexOf(contact) === -1) {
-                        filteredCollection.push(contact);
-                    }
+            return collection.filter(function (element) {
+                return functions.some(function (func) {
+                    return func(collection).indexOf(element) >= 0;
                 });
             });
-
-            return filteredCollection;
         };
     };
+
 
     /**
      * Фильтрация, пересекающая фильтрующие функции
