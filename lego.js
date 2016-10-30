@@ -158,7 +158,7 @@ if (exports.isStar) {
             var filteredCollection = [];
             functions.forEach(function (func) {
 
-                func(collection).forEach(function (contact) {
+                func(collection.slice()).forEach(function (contact) {
                     if (filteredCollection.indexOf(contact) === -1) {
                         filteredCollection.push(contact);
                     }
