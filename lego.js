@@ -179,12 +179,11 @@ if (exports.isStar) {
         var functions = [].slice.call(arguments);
 
         return function and(collection) {
-            var collectionCopy = getCollectionCopy(collection);
             functions.forEach(function (func) {
-                collectionCopy = func(collectionCopy);
+                collection = func(collection);
             });
 
-            return collectionCopy;
+            return collection;
         };
     };
 }
