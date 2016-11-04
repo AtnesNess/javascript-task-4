@@ -6,25 +6,26 @@
  */
 exports.isStar = true;
 
+var PRIORITIES = {
+    'and': 1,
+    'or': 1,
+    'filterIn': 2,
+    'sortBy': 3,
+    'select': 4,
+    'format': 5,
+    'limit': 6
+};
+
 function getCollectionCopy(collection) {
 
     return JSON.parse(JSON.stringify(collection));
 }
 
 function sortByPriority(functions) {
-    var priorities = {
-        'and': 1,
-        'or': 1,
-        'filterIn': 2,
-        'sortBy': 3,
-        'select': 4,
-        'format': 5,
-        'limit': 6
-    };
 
     return functions.sort(function (f1, f2) {
 
-        return priorities[f1.name] < priorities[f2.name] ? -1 : 1;
+        return PRIORITIES[f1.name] < PRIORITIES[f2.name] ? -1 : 1;
     });
 }
 
@@ -37,11 +38,11 @@ function sortByPriority(functions) {
 exports.query = function (collection) {
     var functions = sortByPriority([].slice.call(arguments, 1));
     var collectionCopy = getCollectionCopy(collection);
-    functions.forEach(function (func) {
-        collectionCopy = func(collectionCopy);
-    });
 
-    return collectionCopy;
+    return functions.reduce(function (acc, func) {
+
+        return func(acc);
+    }, collectionCopy);
 };
 
 /**
@@ -75,7 +76,6 @@ exports.select = function () {
  * @returns {Function} - Фильтрующая по значению функция
  */
 exports.filterIn = function (property, values) {
-    // console.info(property, values);
 
     return function filterIn(collection) {
         var filteredCollection = [];
@@ -96,17 +96,13 @@ exports.filterIn = function (property, values) {
  * @returns {Function} - Сортирующая функция
  */
 exports.sortBy = function (property, order) {
-    // console.info(property, order);
 
     return function sortBy(collection) {
 
-        return collection.sort(function (contact1, contact2) {
-            if (order === 'asc') {
+        return collection.sort(function (a, b) {
 
-                return contact1[property] > contact2[property];
-            }
-
-            return contact1[property] < contact2[property];
+            return order === 'asc'
+                ? a[property] > b[property] : a[property] < b[property];
         });
     };
 };
@@ -118,7 +114,6 @@ exports.sortBy = function (property, order) {
  * @returns {Function} -  Форматрирующая функция
  */
 exports.format = function (property, formatter) {
-    // console.info(property, formatter);
 
     return function format(collection) {
 
@@ -136,7 +131,7 @@ exports.format = function (property, formatter) {
  * @returns {Function} - ограничивающая функция
  */
 exports.limit = function (count) {
-    // console.info(count);
+
     return function limit(collection) {
 
         return collection.slice(0, count);
